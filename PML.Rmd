@@ -1,4 +1,4 @@
-Pratical Machine learning project
+Practical Machine learning project
 ========================================================
 
 
