@@ -1,0 +1,63 @@
+Pratical Machine learning project
+========================================================
+
+
+```{r}
+library(randomForest)
+library(caret)
+```
+
+### Supply source URL's, fill NULL values with "NA", create train and test sets:
+
+```{r}
+trainUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+testUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+testing <- read.csv(url(testUrl), na.strings=c("NA","#DIV/0!",""))
+training <- read.csv(url(trainUrl), na.strings=c("NA","#DIV/0!",""))
+
+inTrain <- createDataPartition(y=training$classe, p=0.6, list=FALSE)
+myTraining <- training[inTrain, ]
+myTesting <- training[-inTrain, ]
+```
+
+### Remove columns with more than 50% NA values:
+
+```{r}
+myTestingNoNA <- myTesting[, colSums(is.na(myTesting)) < nrow(myTesting) * 0.5]
+myTrainingNoNA <- myTraining[, colSums(is.na(myTraining)) < nrow(myTraining) * 0.5]
+#also do this for the supplied testset!
+testingNoNA <- testing[, colSums(is.na(testing)) < nrow(testing) * 0.5]
+```
+
+### Remove first 7 columns:
+
+```{r}
+myTrainingNoNA <- myTrainingNoNA[,8:length(colnames(myTrainingNoNA))]
+myTestingNoNA <- myTestingNoNA[,8:length(colnames(myTestingNoNA))]
+testingNoNA <- testingNoNA[,8:length(colnames(testingNoNA))]
+```
+
+### Build model:
+
+```{r}
+modFit <- randomForest(classe ~. , data=myTrainingNoNA)
+```
+
+### Test on own created testset:
+
+```{r}
+predictions <- predict(modFit, myTestingNoNA, type = "class")
+confusionMatrix(predictions, myTestingNoNA$classe)
+```
+
+### YES, 99%+ accuracy!
+
+### Test on supplied testset:
+
+```{r}
+predictions <- predict(modFit, testingNoNA, type = "class")
+print(predictions)
+```
+
+
